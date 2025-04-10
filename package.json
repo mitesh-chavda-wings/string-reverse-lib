@@ -1,12 +1,23 @@
 {
   "name": "string-reverse-lib",
   "version": "1.0.0",
-  "description": "A simple string reverse function",
+  "description": "A library served via CDN",
   "main": "stringReverse.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["string", "reverse", "utility"],
+  "keywords": [
+    "cdn",
+    "library"
+  ],
   "author": "Mitesh chavda",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitesh-chavda-wings/string-reverse-lib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mitesh-chavda-wings/string-reverse-lib/issues"
+  },
+  "homepage": "https://github.com/mitesh-chavda-wings/string-reverse-lib#readme"
 }
