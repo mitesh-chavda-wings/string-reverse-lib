@@ -120,6 +120,35 @@ class CommonUtils {
         }
         return result;
     }
+
+    // Function to clear previous error messages
+    clearErrors() {
+        document.querySelectorAll('.error').forEach(error => {
+            error.style.display = 'none';
+            error.textContent = '';
+        });
+    }
+
+    // Function to display errors below inputs
+    displayErrors(errors) {
+        for (const [fieldName, message] of Object.entries(errors)) {
+            const errorElement = document.getElementById(`${fieldName}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+    }
+
+    // Function to get form data as an object
+    getFormData(form) {
+        const formData = new FormData(form);
+        const data = {};
+        for (const [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        return data;
+    }
 }
 
 // Export for browser use
