@@ -27,7 +27,7 @@ class CommonUtils {
     isRequired(value, inputType = 'text') {
         if (value === undefined || value === null) return false;
         if (typeof value === 'string') return value.trim().length > 0;
-        if (inputType === 'checkbox' || inputType === 'radio') return !!value; // Checked state
+        if (inputType === 'checkbox' || inputType === 'radio') return !!value;
         if (inputType === 'select-one' || inputType === 'select-multiple') return value.length > 0;
         return true;
     }
@@ -82,20 +82,32 @@ class CommonUtils {
         let isValid = true;
 
         for (const [fieldName, rules] of Object.entries(validationRules)) {
-            const field = form.elements[fieldName];
-            if (!field) {
+            const fields = form.elements[fieldName];
+            if (!fields) {
                 errors[fieldName] = 'Field not found in form';
                 isValid = false;
                 continue;
             }
 
-            // Handle multiple elements (e.g., radio, checkbox) or single input
-            const inputType = field.type || field.tagName.toLowerCase();
-            const value = inputType === 'checkbox' || inputType === 'radio' 
-                ? field.checked 
-                : inputType === 'select-multiple' 
-                ? Array.from(field.selectedOptions).map(option => option.value) 
-                : field.value;
+            // Handle single element or NodeList (e.g., radio buttons)
+            let field = fields;
+            let inputType;
+            let value;
+
+            if (fields instanceof NodeList) {
+                // For radio or checkbox groups
+                field = Array.from(fields).find(f => f.checked) || fields[0]; // Use checked or first element
+                inputType = field ? field.type : 'radio'; // Default to 'radio' if no checked
+                value = field ? field.value : '';
+            } else {
+                // Single input (text, select, etc.)
+                inputType = field.type || field.tagName.toLowerCase();
+                value = inputType === 'checkbox' || inputType === 'radio'
+                    ? field.checked
+                    : inputType === 'select-multiple'
+                    ? Array.from(field.selectedOptions).map(option => option.value)
+                    : field.value;
+            }
 
             if (rules.required && !this.isRequired(value, inputType)) {
                 errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
@@ -179,7 +191,7 @@ class CommonUtils {
         return result;
     }
 
-    // UI and Form Helpers (Moved from HTML)
+    // UI and Form Helpers
     clearErrors() {
         document.querySelectorAll('.error').forEach(error => {
             error.style.display = 'none';
