@@ -89,18 +89,17 @@ class CommonUtils {
                 continue;
             }
 
-            // Handle single element or NodeList (e.g., radio buttons)
-            let field = fields;
-            let inputType;
-            let value;
+            let field, inputType, value;
 
             if (fields instanceof NodeList) {
-                // For radio or checkbox groups
-                field = Array.from(fields).find(f => f.checked) || fields[0]; // Use checked or first element
-                inputType = field ? field.type : 'radio'; // Default to 'radio' if no checked
-                value = field ? field.value : '';
+                // Handle radio or checkbox groups
+                const checkedField = Array.from(fields).find(f => f.checked);
+                field = checkedField || fields[0]; // Use checked or first element for error display
+                inputType = field.type;
+                value = checkedField ? checkedField.value : ''; // Value is empty if none checked
             } else {
-                // Single input (text, select, etc.)
+                // Single input
+                field = fields;
                 inputType = field.type || field.tagName.toLowerCase();
                 value = inputType === 'checkbox' || inputType === 'radio'
                     ? field.checked
@@ -109,9 +108,18 @@ class CommonUtils {
                     : field.value;
             }
 
-            if (rules.required && !this.isRequired(value, inputType)) {
-                errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
-                isValid = false;
+            if (rules.required) {
+                if (inputType === 'radio') {
+                    // For radio buttons, check if any in the group is selected
+                    const isAnyChecked = fields instanceof NodeList && Array.from(fields).some(f => f.checked);
+                    if (!isAnyChecked) {
+                        errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
+                        isValid = false;
+                    }
+                } else if (!this.isRequired(value, inputType)) {
+                    errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
+                    isValid = false;
+                }
             }
 
             if (rules.email && !this.isEmailValid(value)) {
