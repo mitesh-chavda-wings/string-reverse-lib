@@ -24,9 +24,11 @@ class CommonUtils {
         return emailRegex.test(email);
     }
 
-    isRequired(value) {
+    isRequired(value, inputType = 'text') {
         if (value === undefined || value === null) return false;
         if (typeof value === 'string') return value.trim().length > 0;
+        if (inputType === 'checkbox' || inputType === 'radio') return !!value; // Checked state
+        if (inputType === 'select-one' || inputType === 'select-multiple') return value.length > 0;
         return true;
     }
 
@@ -46,7 +48,32 @@ class CommonUtils {
         return value.trim().length <= max;
     }
 
-    // New Form Validation Function
+    isMinValue(value, min) {
+        const num = Number(value);
+        return !isNaN(num) && num >= min;
+    }
+
+    isMaxValue(value, max) {
+        const num = Number(value);
+        return !isNaN(num) && num <= max;
+    }
+
+    isPattern(value, pattern) {
+        if (typeof value !== 'string' || !pattern) return false;
+        const regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+        return regex.test(value);
+    }
+
+    isChecked(field) {
+        return field.checked === true;
+    }
+
+    isSelected(value, options = []) {
+        if (Array.isArray(value)) return value.length > 0 && value.every(val => options.includes(val));
+        return options.includes(value);
+    }
+
+    // Enhanced Form Validation Function
     validateForm(formId, validationRules) {
         const form = document.getElementById(formId);
         if (!form) throw new Error(`Form with ID "${formId}" not found`);
@@ -62,9 +89,15 @@ class CommonUtils {
                 continue;
             }
 
-            const value = field.value;
+            // Handle multiple elements (e.g., radio, checkbox) or single input
+            const inputType = field.type || field.tagName.toLowerCase();
+            const value = inputType === 'checkbox' || inputType === 'radio' 
+                ? field.checked 
+                : inputType === 'select-multiple' 
+                ? Array.from(field.selectedOptions).map(option => option.value) 
+                : field.value;
 
-            if (rules.required && !this.isRequired(value)) {
+            if (rules.required && !this.isRequired(value, inputType)) {
                 errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
                 isValid = false;
             }
@@ -86,6 +119,31 @@ class CommonUtils {
 
             if (rules.maxLength && !this.isMaxLength(value, rules.maxLength)) {
                 errors[fieldName] = rules.maxLengthMessage || `${fieldName} must not exceed ${rules.maxLength} characters`;
+                isValid = false;
+            }
+
+            if (rules.minValue && !this.isMinValue(value, rules.minValue)) {
+                errors[fieldName] = rules.minValueMessage || `${fieldName} must be at least ${rules.minValue}`;
+                isValid = false;
+            }
+
+            if (rules.maxValue && !this.isMaxValue(value, rules.maxValue)) {
+                errors[fieldName] = rules.maxValueMessage || `${fieldName} must not exceed ${rules.maxValue}`;
+                isValid = false;
+            }
+
+            if (rules.pattern && !this.isPattern(value, rules.pattern)) {
+                errors[fieldName] = rules.patternMessage || `${fieldName} does not match the required pattern`;
+                isValid = false;
+            }
+
+            if (rules.checked && !this.isChecked(field)) {
+                errors[fieldName] = rules.checkedMessage || `${fieldName} must be checked`;
+                isValid = false;
+            }
+
+            if (rules.options && !this.isSelected(value, rules.options)) {
+                errors[fieldName] = rules.optionsMessage || `${fieldName} must be a valid selection`;
                 isValid = false;
             }
 
@@ -121,7 +179,7 @@ class CommonUtils {
         return result;
     }
 
-    // Function to clear previous error messages
+    // UI and Form Helpers (Moved from HTML)
     clearErrors() {
         document.querySelectorAll('.error').forEach(error => {
             error.style.display = 'none';
@@ -129,7 +187,6 @@ class CommonUtils {
         });
     }
 
-    // Function to display errors below inputs
     displayErrors(errors) {
         for (const [fieldName, message] of Object.entries(errors)) {
             const errorElement = document.getElementById(`${fieldName}-error`);
@@ -140,8 +197,9 @@ class CommonUtils {
         }
     }
 
-    // Function to get form data as an object
-    getFormData(form) {
+    getFormData(formOrId) {
+        const form = typeof formOrId === 'string' ? document.getElementById(formOrId) : formOrId;
+        if (!form || !(form instanceof HTMLFormElement)) throw new Error('Invalid form');
         const formData = new FormData(form);
         const data = {};
         for (const [key, value] of formData.entries()) {
