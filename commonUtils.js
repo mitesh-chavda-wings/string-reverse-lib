@@ -29,6 +29,7 @@ class CommonUtils {
         if (typeof value === 'string') return value.trim().length > 0;
         if (inputType === 'checkbox' || inputType === 'radio') return !!value;
         if (inputType === 'select-one' || inputType === 'select-multiple') return value.length > 0;
+        if (inputType === 'file') return value.length > 0; // Check if files are selected
         return true;
     }
 
@@ -73,6 +74,23 @@ class CommonUtils {
         return options.includes(value);
     }
 
+    // File Validation Utilities
+    isFileSizeValid(files, maxSize) {
+        if (!files || !files.length) return false;
+        return Array.from(files).every(file => file.size <= maxSize);
+    }
+
+    isFileTypeValid(files, allowedTypes) {
+        if (!files || !files.length || !allowedTypes || !allowedTypes.length) return false;
+        return Array.from(files).every(file => allowedTypes.includes(file.type) || allowedTypes.includes(file.name.split('.').pop().toLowerCase()));
+    }
+
+    isFileCountValid(files, minCount = 1, maxCount = Infinity) {
+        if (!files) return false;
+        const count = files.length;
+        return count >= minCount && count <= maxCount;
+    }
+
     // Enhanced Form Validation Function
     validateForm(formId, validationRules) {
         const form = document.getElementById(formId);
@@ -94,23 +112,23 @@ class CommonUtils {
             if (fields instanceof NodeList) {
                 // Handle radio or checkbox groups
                 const checkedField = Array.from(fields).find(f => f.checked);
-                field = checkedField || fields[0]; // Use checked or first element for error display
+                field = checkedField || fields[0];
                 inputType = field.type;
-                value = checkedField ? checkedField.value : ''; // Value is empty if none checked
+                value = checkedField ? checkedField.value : '';
             } else {
-                // Single input
                 field = fields;
                 inputType = field.type || field.tagName.toLowerCase();
                 value = inputType === 'checkbox' || inputType === 'radio'
                     ? field.checked
                     : inputType === 'select-multiple'
                     ? Array.from(field.selectedOptions).map(option => option.value)
+                    : inputType === 'file'
+                    ? field.files
                     : field.value;
             }
 
             if (rules.required) {
                 if (inputType === 'radio') {
-                    // For radio buttons, check if any in the group is selected
                     const isAnyChecked = fields instanceof NodeList && Array.from(fields).some(f => f.checked);
                     if (!isAnyChecked) {
                         errors[fieldName] = rules.requiredMessage || `${fieldName} is required`;
@@ -170,6 +188,24 @@ class CommonUtils {
             if (rules.custom && !rules.custom(value)) {
                 errors[fieldName] = rules.customMessage || `${fieldName} failed custom validation`;
                 isValid = false;
+            }
+
+            // File-specific validations
+            if (inputType === 'file') {
+                if (rules.maxSize && !this.isFileSizeValid(value, rules.maxSize)) {
+                    errors[fieldName] = rules.maxSizeMessage || `${fieldName} exceeds maximum file size (${rules.maxSize} bytes)`;
+                    isValid = false;
+                }
+
+                if (rules.allowedTypes && !this.isFileTypeValid(value, rules.allowedTypes)) {
+                    errors[fieldName] = rules.allowedTypesMessage || `${fieldName} must be of type ${rules.allowedTypes.join(', ')}`;
+                    isValid = false;
+                }
+
+                if (rules.fileCount && !this.isFileCountValid(value, rules.fileCount.min, rules.fileCount.max)) {
+                    errors[fieldName] = rules.fileCountMessage || `${fieldName} must have between ${rules.fileCount.min} and ${rules.fileCount.max} files`;
+                    isValid = false;
+                }
             }
         }
 
