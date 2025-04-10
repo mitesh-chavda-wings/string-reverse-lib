@@ -1,0 +1,12 @@
+{
+  "name": "string-reverse-lib",
+  "version": "1.0.0",
+  "description": "A simple string reverse function",
+  "main": "stringReverse.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["string", "reverse", "utility"],
+  "author": "Your Name",
+  "license": "MIT"
+}
