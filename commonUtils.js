@@ -115,6 +115,116 @@ class CommonUtils {
             .replace(/^-+|-+$/g, '');
     }
 
+    // Event Utilities
+    delegate(selector, event, handler) {
+        return (e) => {
+            if (e.target.matches(selector)) {
+                handler(e);
+            }
+        };
+    }
+
+    // Animation Utilities
+    fadeIn(el, duration = 300) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        el.style.opacity = 0;
+        el.style.display = 'block';
+        let startTime = null;
+        function animate(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const progress = currentTime - startTime;
+            el.style.opacity = Math.min(progress / duration, 1);
+            if (progress < duration) {
+                requestAnimationFrame(animate);
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    fadeOut(el, duration = 300) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        let startTime = null;
+        function animate(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const progress = currentTime - startTime;
+            el.style.opacity = 1 - Math.min(progress / duration, 1);
+            if (progress < duration) {
+                requestAnimationFrame(animate);
+            } else {
+                el.style.display = 'none';
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    slideUp(el, duration = 300) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        el.style.height = el.offsetHeight + 'px';
+        el.style.transition = `height ${duration}ms ease-in-out`;
+        requestAnimationFrame(() => {
+            el.style.height = 0;
+        });
+    }
+
+    slideDown(el, duration = 300) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        const height = el.scrollHeight + 'px';
+        el.style.height = 0;
+        el.style.transition = `height ${duration}ms ease-in-out`;
+        requestAnimationFrame(() => {
+            el.style.height = height;
+        });
+    }
+
+    // Cookie Utilities
+    setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    deleteCookie(name) {
+        document.cookie = name + '=; Max-Age=-99999999;';
+    }
+
+    // API/AJAX Utilities
+    async httpGet(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    }
+
+    async httpPost(url, data) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    }
+
     // Form Validation Utilities
     isEmailValid(email) {
         if (typeof email !== 'string') return false;

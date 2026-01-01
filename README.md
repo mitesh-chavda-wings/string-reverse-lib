@@ -45,3 +45,21 @@ Array Utilities
    * getQueryParams(): Retrieves URL query parameters and returns them as an object.
    * truncateString(str, length): Truncates a string to a specified length and appends an ellipsis.
    * slugify(str): Converts a string into a URL-friendly slug.
+
+  Event Handling
+   - delegate(selector, event, handler): A robust event delegation helper.
+
+  Animation Utilities
+   - fadeIn(el, duration): Fade in an element.
+   - fadeOut(el, duration): Fade out an element.
+   - slideUp(el, duration): Slide an element up.
+   - slideDown(el, duration): Slide an element down.
+
+  Cookie Utilities
+   - setCookie(name, value, days): Set a cookie.
+   - getCookie(name): Get a cookie.
+   - deleteCookie(name): Delete a cookie.
+
+  API/AJAX Utilities
+   - httpGet(url): A simple GET request wrapper around fetch.
+   - httpPost(url, data): A simple POST request wrapper around fetch.
