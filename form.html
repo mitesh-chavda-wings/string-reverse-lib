@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/gh/mitesh-chavda-wings/string-reverse-lib@2.1.6/commonUtils.min.js"></script>
+    <style>
+        .error { color: red; font-size: 12px; margin-top: 5px; display: none; }
+        .input-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <form id="myForm">
+        <div class="input-group">
+            <label>Username: <input type="text" name="username" value=""></label>
+            <div class="error" id="username-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Email: <input type="email" name="email" value=""></label>
+            <div class="error" id="email-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Age: <input type="number" name="age" value=""></label>
+            <div class="error" id="age-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Phone: <input type="text" name="phone" value=""></label>
+            <div class="error" id="phone-error"></div>
+        </div>
+        <div class="input-group">
+            <label> Agree: <input type="checkbox" name="agree"></label>
+            <div class="error" id="agree-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Gender:
+                <input type="radio" name="gender" value="male"> Male
+                <input type="radio" name="gender" value="female"> Female
+            </label>
+            <div class="error" id="gender-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Hobbies:
+                <select name="hobbies" multiple>
+                    <option value="reading">Reading</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="sports">Sports</option>
+                </select>
+            </label>
+            <div class="error" id="hobbies-error"></div>
+        </div>
+        <div class="input-group">
+            <label>Profile Picture: <input type="file" name="profile" accept="image/*" multiple></label>
+            <div class="error" id="profile-error"></div>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const utils = new CommonUtils();
+        const form = document.getElementById('myForm');
+        const rules = {
+            username: { required: true, minLength: 3 },
+            email: { required: true, email: true },
+            age: { required: true, number: true, minValue: 18, maxValue: 100 },
+            phone: { required: true, pattern: /^\d{10}$/, patternMessage: "Phone must be a 10-digit number" },
+            agree: { required: true, checked: true },
+            gender: { required: true },
+            hobbies: { required: true, options: ['reading', 'gaming', 'sports'] },
+            profile: { 
+                required: true, 
+                maxSize: 2 * 1024 * 1024, // 2MB
+                allowedTypes: ['image/jpeg', 'image/png', 'jpg', 'png'],
+                fileCount: { min: 1, max: 3 }
+            }
+        };
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            utils.clearErrors();
+            const result = utils.validateForm('myForm', rules);
+
+            if (result.isValid) {
+                const formData = utils.getFormData(form);
+                console.log('Form Data:', formData);
+            } else {
+                utils.displayErrors(result.errors);
+            }
+        });
+    </script>
+</body>
+</html>

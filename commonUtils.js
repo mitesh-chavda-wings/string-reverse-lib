@@ -17,6 +17,104 @@ class CommonUtils {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
+    // Array Utilities
+    shuffleArray(arr) {
+        if (!Array.isArray(arr)) throw new Error('Input must be an array');
+        const array = [...arr];
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    uniqueArray(arr) {
+        if (!Array.isArray(arr)) throw new Error('Input must be an array');
+        return [...new Set(arr)];
+    }
+
+    chunkArray(arr, size) {
+        if (!Array.isArray(arr)) throw new Error('Input must be an array');
+        if (typeof size !== 'number' || size <= 0) throw new Error('Size must be a positive number');
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+    }
+
+    // Date/Time Utilities
+    formatDate(date, format = 'YYYY-MM-DD') {
+        if (!(date instanceof Date)) throw new Error('Input must be a Date object');
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        return format
+            .replace('YYYY', year)
+            .replace('MM', month)
+            .replace('DD', day)
+            .replace('HH', hours)
+            .replace('mm', minutes)
+            .replace('ss', seconds);
+    }
+
+    timeAgo(date) {
+        if (!(date instanceof Date)) throw new Error('Input must be a Date object');
+        const seconds = Math.floor((new Date() - date) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hours ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " minutes ago";
+        return Math.floor(seconds) + " seconds ago";
+    }
+
+    // DOM Utilities
+    toggleClass(el, className) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        el.classList.toggle(className);
+    }
+
+    setStyle(el, styles) {
+        if (!(el instanceof Element)) throw new Error('Input must be a DOM element');
+        if (typeof styles !== 'object' || styles === null) throw new Error('Styles must be an object');
+        Object.assign(el.style, styles);
+    }
+
+    // Miscellaneous Utilities
+    getQueryParams() {
+        const params = {};
+        new URLSearchParams(window.location.search).forEach((value, key) => {
+            params[key] = value;
+        });
+        return params;
+    }
+
+    truncateString(str, length) {
+        if (typeof str !== 'string') throw new Error('Input must be a string');
+        if (str.length <= length) return str;
+        return str.slice(0, length) + '...';
+    }
+
+    slugify(str) {
+        if (typeof str !== 'string') throw new Error('Input must be a string');
+        return str
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
     // Form Validation Utilities
     isEmailValid(email) {
         if (typeof email !== 'string') return false;

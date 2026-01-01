@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://cdn.jsdelivr.net/gh/mitesh-chavda-wings/string-reverse-lib@1.0.1/stringReverse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mitesh-chavda-wings/string-reverse-lib@1.0.3/stringReverse.min.js"></script>
 </head>
 <body>
     <script>
-        console.log(reverseString("Hello")); // Should log "olleH"
-        console.log(countString("Hello")); // Should log 5
+        const utils = new StringUtils();
+        console.log(utils.reverseString("Hello")); // Should log "olleH"
+        console.log(utils.countString("Hello")); // Should log 5
     </script>
 </body>
 </html>

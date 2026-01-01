@@ -27,3 +27,21 @@ Example your cdn url :- https://cdn.jsdelivr.net/gh/mitesh-chavda-wings/string-r
     console.log(reverseString("Hello")); // Should log "olleH"
     console.log(countString("Hello")); // Should log 5
 </script>
+
+Array Utilities
+   * shuffleArray(arr): Randomly shuffles the elements of an array.
+   * uniqueArray(arr): Creates an array with only the unique values from an existing array.
+   * chunkArray(arr, size): Splits an array into smaller arrays of a specified size.
+
+  Date/Time Utilities
+   * formatDate(date, format): Formats a date object into a string with a specified format (e.g., 'YYYY-MM-DD').
+   * timeAgo(date): Generates a human-readable string that represents how long ago a date was (e.g., "2 hours ago").
+
+  DOM Utilities
+   * toggleClass(el, className): Toggles a class on a given DOM element.
+   * setStyle(el, styles): Applies multiple CSS styles to a DOM element at once.
+
+  Miscellaneous Utilities
+   * getQueryParams(): Retrieves URL query parameters and returns them as an object.
+   * truncateString(str, length): Truncates a string to a specified length and appends an ellipsis.
+   * slugify(str): Converts a string into a URL-friendly slug.
