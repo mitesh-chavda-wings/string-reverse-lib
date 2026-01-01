@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>CommonUtils Demo</title>
-    <script src="commonUtils.min.js"></script>
+    <script src="commonUtils.js"></script>
     <style>
         body { font-family: sans-serif; }
         .function-demo { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
@@ -45,7 +45,10 @@
             button.addEventListener('click', () => {
                 const inputValues = inputs.map(input => input.value);
                 try {
-                    const result = fn(...inputValues.map((val, i) => {
+                    if (typeof fn !== 'function') {
+                        throw new Error(`The utility for '${title}' is not a function.`);
+                    }
+                    const args = inputValues.map((val, i) => {
                         // Attempt to convert to number if it looks like one
                         if (!isNaN(val) && val.trim() !== '') return Number(val);
                         // Attempt to convert to array if it looks like one
@@ -60,10 +63,13 @@
                         const date = new Date(val);
                         if (!isNaN(date.getTime())) return date;
                         return val;
-                    }));
+                    });
+                    console.log(`Calling ${title} with arguments:`, args);
+                    const result = fn(...args);
                     resultEl.textContent = 'Result: ' + JSON.stringify(result, null, 2);
                 } catch (e) {
                     resultEl.textContent = 'Error: ' + e.message;
+                    console.error(`Error in ${title} demo:`, e);
                 }
             });
 
@@ -71,23 +77,23 @@
         }
 
         // --- String Utilities ---
-        createDemo('reverseString', utils.reverseString, ['string']);
-        createDemo('countString', utils.countString, ['string']);
-        createDemo('capitalizeString', utils.capitalizeString, ['string']);
-        createDemo('truncateString', (str, len) => utils.truncateString(str, parseInt(len)), ['string', 'length']);
-        createDemo('slugify', utils.slugify, ['string']);
+        createDemo('reverseString', utils.reverseString.bind(utils), ['string']);
+        createDemo('countString', utils.countString.bind(utils), ['string']);
+        createDemo('capitalizeString', utils.capitalizeString.bind(utils), ['string']);
+        createDemo('truncateString', utils.truncateString.bind(utils), ['string', 'length']);
+        createDemo('slugify', utils.slugify.bind(utils), ['string']);
 
         // --- Array Utilities ---
-        createDemo('shuffleArray', (arrStr) => utils.shuffleArray(JSON.parse(arrStr)), ['array (e.g., [1,2,3])']);
-        createDemo('uniqueArray', (arrStr) => utils.uniqueArray(JSON.parse(arrStr)), ['array (e.g., [1,1,2])']);
-        createDemo('chunkArray', (arrStr, size) => utils.chunkArray(JSON.parse(arrStr), parseInt(size)), ['array (e.g., [1,2,3,4])', 'size']);
+        createDemo('shuffleArray', utils.shuffleArray.bind(utils), ['array (e.g., [1,2,3])']);
+        createDemo('uniqueArray', utils.uniqueArray.bind(utils), ['array (e.g., [1,1,2])']);
+        createDemo('chunkArray', utils.chunkArray.bind(utils), ['array (e.g., [1,2,3,4])', 'size']);
 
         // --- Date/Time Utilities ---
-        createDemo('formatDate', (dateStr, format) => utils.formatDate(new Date(dateStr), format), ['date (e.g., 2023-10-27)', 'format (e.g., YYYY-MM-DD)']);
-        createDemo('timeAgo', (dateStr) => utils.timeAgo(new Date(dateStr)), ['date (e.g., 2023-10-26)']);
+        createDemo('formatDate', utils.formatDate.bind(utils), ['date (e.g., 2023-10-27)', 'format (e.g., YYYY-MM-DD)']);
+        createDemo('timeAgo', utils.timeAgo.bind(utils), ['date (e.g., 2023-10-26)']);
 
         // --- Miscellaneous Utilities ---
-        createDemo('generateRandomId', (len) => utils.generateRandomId(parseInt(len)), ['length']);
+        createDemo('generateRandomId', utils.generateRandomId.bind(utils), ['length']);
 
     </script>
 </body>
