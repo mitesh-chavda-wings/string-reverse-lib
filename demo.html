@@ -5,43 +5,86 @@
     <script src="commonUtils.js"></script>
     <style>
         body { font-family: sans-serif; }
+        .section { margin-bottom: 20px; border-top: 2px solid #000; padding-top: 10px; }
         .function-demo { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
         .function-demo h3 { margin-top: 0; }
-        input, button { margin-right: 5px; }
+        input, button, textarea { margin-right: 5px; margin-bottom: 5px; }
+        #animation-box { width: 100px; height: 100px; background-color: steelblue; }
+        #cookie-display, #http-display { white-space: pre-wrap; background-color: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
     <h1>CommonUtils.js Demo</h1>
 
-    <div id="demos"></div>
+    <div class="section">
+        <h2>String, Array, and Other Utilities</h2>
+        <div id="demos"></div>
+    </div>
+
+    <div class="section">
+        <h2>Animation Utilities</h2>
+        <div class="function-demo">
+            <div id="animation-box"></div>
+            <br>
+            <button id="fadeIn-btn">Fade In</button>
+            <button id="fadeOut-btn">Fade Out</button>
+            <button id="slideUp-btn">Slide Up</button>
+            <button id="slideDown-btn">Slide Down</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Cookie Utilities</h2>
+        <div class="function-demo">
+            <input id="cookie-name" placeholder="Cookie Name">
+            <input id="cookie-value" placeholder="Cookie Value">
+            <button id="set-cookie-btn">Set Cookie (for 1 day)</button>
+            <button id="get-cookie-btn">Get Cookie</button>
+            <button id="delete-cookie-btn">Delete Cookie</button>
+            <h3>Current Cookie Value:</h3>
+            <div id="cookie-display">(click 'Get Cookie' to view)</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>HTTP (AJAX) Utilities</h2>
+        <div class="function-demo">
+            <h3>GET Request</h3>
+            <input id="get-url" value="https://jsonplaceholder.typicode.com/posts/1" style="width: 300px;">
+            <button id="http-get-btn">GET</button>
+            <h3>POST Request</h3>
+            <input id="post-url" value="https://jsonplaceholder.typicode.com/posts" style="width: 300px;">
+            <br>
+            <textarea id="post-data" rows="3" style="width: 300px;">{"title": "foo","body": "bar","userId": 1}</textarea>
+            <button id="http-post-btn">POST</button>
+            <h3>HTTP Response:</h3>
+            <div id="http-display">(response will be shown here)</div>
+        </div>
+    </div>
 
     <script>
         const utils = new CommonUtils();
         const demosContainer = document.getElementById('demos');
 
+        // --- Generic Demo Creator from before ---
         function createDemo(title, fn, inputLabels) {
             const demoDiv = document.createElement('div');
             demoDiv.className = 'function-demo';
-
             const titleEl = document.createElement('h3');
             titleEl.textContent = title;
             demoDiv.appendChild(titleEl);
-
             const inputs = inputLabels.map(label => {
                 const input = document.createElement('input');
                 input.placeholder = label;
                 demoDiv.appendChild(input);
                 return input;
             });
-
             const button = document.createElement('button');
             button.textContent = 'Run';
             demoDiv.appendChild(button);
-
             const resultEl = document.createElement('p');
             resultEl.textContent = 'Result: ';
             demoDiv.appendChild(resultEl);
-
             button.addEventListener('click', () => {
                 const inputValues = inputs.map(input => input.value);
                 try {
@@ -49,17 +92,10 @@
                         throw new Error(`The utility for '${title}' is not a function.`);
                     }
                     const args = inputValues.map((val, i) => {
-                        // Attempt to convert to number if it looks like one
                         if (!isNaN(val) && val.trim() !== '') return Number(val);
-                        // Attempt to convert to array if it looks like one
                         if (val.startsWith('[') && val.endsWith(']')) {
-                            try {
-                                return JSON.parse(val);
-                            } catch (e) {
-                                return val; // Keep as string if parsing fails
-                            }
+                            try { return JSON.parse(val); } catch (e) { return val; }
                         }
-                        // Attempt to convert to date if it looks like a date string
                         const date = new Date(val);
                         if (!isNaN(date.getTime())) return date;
                         return val;
@@ -72,28 +108,86 @@
                     console.error(`Error in ${title} demo:`, e);
                 }
             });
-
             demosContainer.appendChild(demoDiv);
         }
 
-        // --- String Utilities ---
+        // --- Basic Utilities ---
         createDemo('reverseString', utils.reverseString.bind(utils), ['string']);
         createDemo('countString', utils.countString.bind(utils), ['string']);
         createDemo('capitalizeString', utils.capitalizeString.bind(utils), ['string']);
         createDemo('truncateString', utils.truncateString.bind(utils), ['string', 'length']);
         createDemo('slugify', utils.slugify.bind(utils), ['string']);
-
-        // --- Array Utilities ---
         createDemo('shuffleArray', utils.shuffleArray.bind(utils), ['array (e.g., [1,2,3])']);
         createDemo('uniqueArray', utils.uniqueArray.bind(utils), ['array (e.g., [1,1,2])']);
         createDemo('chunkArray', utils.chunkArray.bind(utils), ['array (e.g., [1,2,3,4])', 'size']);
-
-        // --- Date/Time Utilities ---
         createDemo('formatDate', utils.formatDate.bind(utils), ['date (e.g., 2023-10-27)', 'format (e.g., YYYY-MM-DD)']);
         createDemo('timeAgo', utils.timeAgo.bind(utils), ['date (e.g., 2023-10-26)']);
-
-        // --- Miscellaneous Utilities ---
         createDemo('generateRandomId', utils.generateRandomId.bind(utils), ['length']);
+
+        // --- Animation Demos ---
+        const animationBox = document.getElementById('animation-box');
+        document.getElementById('fadeIn-btn').addEventListener('click', () => utils.fadeIn(animationBox, 500));
+        document.getElementById('fadeOut-btn').addEventListener('click', () => utils.fadeOut(animationBox, 500));
+        document.getElementById('slideUp-btn').addEventListener('click', () => utils.slideUp(animationBox, 300));
+        document.getElementById('slideDown-btn').addEventListener('click', () => utils.slideDown(animationBox, 300));
+        
+        // --- Cookie Demos ---
+        const cookieNameInput = document.getElementById('cookie-name');
+        const cookieValueInput = document.getElementById('cookie-value');
+        const cookieDisplay = document.getElementById('cookie-display');
+        document.getElementById('set-cookie-btn').addEventListener('click', () => {
+            const name = cookieNameInput.value;
+            const value = cookieValueInput.value;
+            if(name) {
+                utils.setCookie(name, value, 1);
+                alert(`Cookie '${name}' set!`);
+            } else {
+                alert('Please provide a cookie name.');
+            }
+        });
+        document.getElementById('get-cookie-btn').addEventListener('click', () => {
+            const name = cookieNameInput.value;
+            if(name) {
+                const value = utils.getCookie(name);
+                cookieDisplay.textContent = value === null ? `Cookie '${name}' not found.` : value;
+            } else {
+                alert('Please provide a cookie name.');
+            }
+        });
+        document.getElementById('delete-cookie-btn').addEventListener('click', () => {
+            const name = cookieNameInput.value;
+             if(name) {
+                utils.deleteCookie(name);
+                alert(`Cookie '${name}' deleted!`);
+                cookieDisplay.textContent = '(cleared)';
+            } else {
+                alert('Please provide a cookie name.');
+            }
+        });
+
+        // --- HTTP Demos ---
+        const httpDisplay = document.getElementById('http-display');
+        document.getElementById('http-get-btn').addEventListener('click', async () => {
+            const url = document.getElementById('get-url').value;
+            try {
+                httpDisplay.textContent = 'Loading...';
+                const data = await utils.httpGet(url);
+                httpDisplay.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                httpDisplay.textContent = `Error: ${e.message}`;
+            }
+        });
+        document.getElementById('http-post-btn').addEventListener('click', async () => {
+            const url = document.getElementById('post-url').value;
+            const postData = document.getElementById('post-data').value;
+            try {
+                httpDisplay.textContent = 'Loading...';
+                const data = await utils.httpPost(url, JSON.parse(postData));
+                httpDisplay.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                httpDisplay.textContent = `Error: ${e.message}`;
+            }
+        });
 
     </script>
 </body>
